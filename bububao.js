@@ -111,7 +111,7 @@ if (!COOKIE.bububaotokenVal) {
         bububaotokenArr.push($.getdata("bububaotoken"));
         // 根据boxjs中设置的额外账号数，添加存在的账号数据进行任务处理
         if ("bububaoCASH") {
-            CASH = $.getval("bububaoCASH") || '0';
+            CASH = $.getdata("bububaoCASH") || '0';
         }
         let bububaoCount = ($.getval('bububaoCount') || '1') - 0;
         for (let i = 2; i <= bububaoCount; i++) {
@@ -312,13 +312,14 @@ async function all() {
         header = {
             'tokenstr': `${bububaotokenVal}`,
             'idfa': ``,
-            'ini': `21`,
             'store': `0`,
+            'ini': `30`,
             'Content-Type': `application/x-www-form-urlencoded`,
             'platform': `1`,
             'version': `18`,
             'imei': ``,
             'Cookie': ``,
+            'Content-Length': `6`,
             'Host': `bububao.duoshoutuan.com`,
             'Accept-Language': `zh-cn`,
             'Accept': `*/*`
@@ -1744,6 +1745,7 @@ function tixian_html(timeout = 0) {
                         if (!day_tixian_tip && ($.user.wx_username != "" || $.user.is_weixin == 1)) {
 
                             if (CASH == 0.3 && $.user.day_jinbi >= 5000 && $.user.money >= CASH) {
+                                console.log(`cash 0.3`);
                                 await tixian() //提现
                             }
                             if (CASH > 0.3 && CASH <= 200 && $.user.money >= CASH) {
@@ -1758,6 +1760,7 @@ function tixian_html(timeout = 0) {
                                     CASH = 50
                                 } else if ($.user.money >= 0.3 && $.user.day_jinbi >= 5000) {
                                     CASH = 0.3
+                                    console.log(`cash 0.3`);
                                 }
                                 if (CASH != 888) {
                                     await tixian() //提现
@@ -1781,7 +1784,7 @@ function tixian(timeout = 0) {
             let url = {
                 url: `https://bububao.duoshoutuan.com/user/tixian?`,
                 headers: header,
-                body: `tx=${CASH}&`,
+                body: `tx=${CASH}`,
             }
             $.post(url, async (err, resp, data) => {
                 try {
