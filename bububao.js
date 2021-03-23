@@ -22,6 +22,7 @@ boxjs链接  https://raw.githubusercontent.com/6Svip120apk69/gitee_q8qsTAUA_cThx
 3.5 优化提现
 3.8 替换为循环获取ck
 3.13 修复0.3提现
+3.23 设置CASH为1000以上时则在23.59分执行1秒的循环提现，以此类推
 
 ⚠️ 时间设置    0,30 0-23 * * *    每天 35次以上就行   
 
@@ -61,7 +62,7 @@ http-response https:\/\/bububao\.duoshoutuan\.com\/user\/* script-path=https://r
 #步步宝获取TOKEN
 步步宝获取TOKEN = type=http-response,pattern=https:\/\/bububao\.duoshoutuan\.com\/user\/*,script-path=https://raw.githubusercontent.com/6Svip120apk69/gitee_q8qsTAUA_cThxc1RBVUE/main/Task/bububao.js
 */
-GXRZ = '3.13 修复0.3提现'
+GXRZ = '3.23 设置CASH为1000则在23.59分执行1秒的50元循环提现，以此类推'
 const $ = Env("步步宝");
 $.idx = ($.idx = ($.getval('bububaoSuffix') || '1') - 1) > 0 ? ($.idx + 1 + '') : ''; // 账号扩展字符
 const notify = $.isNode() ? require("./sendNotify") : ``;
@@ -111,7 +112,7 @@ if (!COOKIE.bububaotokenVal) {
         bububaotokenArr.push($.getdata("bububaotoken"));
         // 根据boxjs中设置的额外账号数，添加存在的账号数据进行任务处理
         if ("bububaoCASH") {
-            CASH = $.getdata("bububaoCASH") || '0';
+            CASH = $.getval("bububaoCASH") || '0';
         }
         let bububaoCount = ($.getval('bububaoCount') || '1') - 0;
         for (let i = 2; i <= bububaoCount; i++) {
@@ -280,9 +281,12 @@ if (isGetCookie) {
     $.done();
 } else {
     !(async () => {
+
         await all();
+
         await $.wait(1000)
         await msgShow();
+
     })()
     .catch((e) => {
             $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -312,50 +316,65 @@ async function all() {
         header = {
             'tokenstr': `${bububaotokenVal}`,
             'idfa': ``,
+            'ini': `21`,
             'store': `0`,
-            'ini': `30`,
             'Content-Type': `application/x-www-form-urlencoded`,
             'platform': `1`,
             'version': `18`,
             'imei': ``,
             'Cookie': ``,
-            'Content-Length': `6`,
             'Host': `bububao.duoshoutuan.com`,
             'Accept-Language': `zh-cn`,
             'Accept': `*/*`
         };
         O = (`${$.name + (i + 1)}🔔`);
-        await console.log(`-------------------------\n\n🔔开始运行【${$.name+(i+1)}】`)
-        let cookie_is_live = await user(); //用户名
-        if (!cookie_is_live) {
-            continue;
-        }
-        //await userjinbi() //收益记录
-        if (CZ >= 10) {
-            await help_index() //助力活动
-            await home() //首页信息
-            await jindan_click() //首页金蛋
-            await sign_html() //签到
-            await dk_info() //打卡
-            await cy_info() //答题
-            await water_info() //喝水
-            await sleep_info() //睡觉
-            await ggk() //刮刮卡
-            await $.wait(8000)
-            await lucky() //转盘抽奖
-            await $.wait(1000)
-            await lucky() //转盘抽奖
-            await $.wait(1000)
-            await lucky() //转盘抽奖
-            await $.wait(1000)
-            await h5_list() //看看赚
-            await news() //看文章
-            await renwu() //赚赚任务
-            await tixian_html() //提现
-        }
 
-        console.log(`${GXRZ}\n`);
-        $.message += `${GXRZ}\n`
+
+        if (CASH >= 1000&&nowTimes.getHours() === 23&&nowTimes.getMinutes() == 59) {
+            A = Date.now()
+            B = Date.now() + CASH
+            C= daytime()+86400000
+            while (Date.now() <= B) {
+              if (Date.now() >= C&&Date.now() <= C+5) {
+                CASH = 50
+                 tixian()
+             }
+         }
+
+        } else {
+            await console.log(`-------------------------\n\n🔔开始运行【${$.name+(i+1)}】`)
+            let cookie_is_live = await user(); //用户名
+            if (!cookie_is_live) {
+                continue;
+            }
+            //await userjinbi() //收益记录
+            if (CZ >= 10) {
+                await help_index() //助力活动
+                await home() //首页信息
+                await jindan_click() //首页金蛋
+                await sign_html() //签到
+                await dk_info() //打卡
+                await cy_info() //答题
+                await water_info() //喝水
+                await sleep_info() //睡觉
+                await ggk() //刮刮卡
+                await $.wait(8000)
+                await lucky() //转盘抽奖
+                await $.wait(1000)
+                await lucky() //转盘抽奖
+                await $.wait(1000)
+                await lucky() //转盘抽奖
+                await $.wait(1000)
+                await h5_list() //看看赚
+                await news() //看文章
+                await renwu() //赚赚任务
+                await tixian_html() //提现
+            }
+
+            console.log(`${GXRZ}\n`);
+            $.message += `${GXRZ}\n`
+
+        }
 
     }
 }
@@ -1745,13 +1764,12 @@ function tixian_html(timeout = 0) {
                         if (!day_tixian_tip && ($.user.wx_username != "" || $.user.is_weixin == 1)) {
 
                             if (CASH == 0.3 && $.user.day_jinbi >= 5000 && $.user.money >= CASH) {
-                                console.log(`cash 0.3`);
                                 await tixian() //提现
                             }
                             if (CASH > 0.3 && CASH <= 200 && $.user.money >= CASH) {
                                 await tixian() //提现
                             }
-                            if (CASH == 888) {
+                            if (CASH >= 888) {
                                 if ($.user.money >= 200 && fenshu5 && fenshu5 > 0) {
                                     CASH = 200
                                 } else if ($.user.money >= 100 && fenshu4 && fenshu4 > 0) {
@@ -1760,9 +1778,8 @@ function tixian_html(timeout = 0) {
                                     CASH = 50
                                 } else if ($.user.money >= 0.3 && $.user.day_jinbi >= 5000) {
                                     CASH = 0.3
-                                    console.log(`cash 0.3`);
                                 }
-                                if (CASH != 888) {
+                                if (CASH <= 888) {
                                     await tixian() //提现
                                 }
                             }
@@ -1784,13 +1801,16 @@ function tixian(timeout = 0) {
             let url = {
                 url: `https://bububao.duoshoutuan.com/user/tixian?`,
                 headers: header,
-                body: `tx=${CASH}`,
+                body: `tx=${CASH}&`,
             }
             $.post(url, async (err, resp, data) => {
                 try {
                     if (logs) $.log(`${O}, 现金提现🚩: ${decodeUnicode(data)}`);
                     $.tixian = JSON.parse(data);
                     if ($.tixian.code == 1) {
+                        console.log(`现金提现：${$.tixian.msg}\n`);
+                        $.message += `【现金提现】：${$.tixian.msg}\n`;
+                    } else {
                         console.log(`现金提现：${$.tixian.msg}\n`);
                         $.message += `【现金提现】：${$.tixian.msg}\n`;
                     }
@@ -1803,6 +1823,8 @@ function tixian(timeout = 0) {
         }, timeout)
     })
 }
+
+
 // prettier-ignore
 function Env(t, e) {
     class s {
