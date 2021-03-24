@@ -1305,7 +1305,7 @@ return new Promise((resolve, reject) => {
      const cash = JSON.parse(data)
      if(response.statusCode == 200 && cash.code != -1){
 if(cash.jinbi >= 500000){
-     tip = 50
+     tip = 0.3
       await withDraw()
      }else if(cash.day_jinbi > 5000){
      tip = 0.3
